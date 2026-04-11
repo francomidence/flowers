@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Product } from '@/lib/types';
@@ -24,18 +26,23 @@ export function ProductCard({ product, size = 'md' }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
       <Card hoverable className={sizeClasses[size]}>
-        <CardImage
-          src={product.image}
-          alt={product.name}
-          aspectRatio={aspectRatios[size]}
-        />
-        <CardBody>
+        <div className="relative bg-gradient-to-br from-clay-light/20 via-sage/10 to-cream overflow-hidden">
+          <CardImage
+            src={product.image}
+            alt={product.name}
+            aspectRatio={aspectRatios[size]}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
+        <CardBody className="bg-white">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div>
               <h3 className="font-sans font-semibold text-lg text-charcoal">
                 {product.name}
               </h3>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+              <p className="text-sm text-charcoal/70 mt-1 line-clamp-2">
                 {product.description}
               </p>
             </div>
@@ -62,15 +69,15 @@ export function ProductCard({ product, size = 'md' }: ProductCardProps) {
 
           {/* Specs */}
           {product.stems && (
-            <p className="text-xs text-gray-500 mt-2">{product.stems} stems</p>
+            <p className="text-xs text-charcoal/60 mt-2">✓ {product.stems} stems</p>
           )}
 
           {/* Rating */}
           {product.rating && (
             <div className="flex items-center gap-1 mt-2 text-sm">
-              <span className="text-yellow-500">★</span>
+              <span className="text-sage">★</span>
               <span className="text-charcoal font-medium">{product.rating}</span>
-              <span className="text-gray-500">({product.reviews} reviews)</span>
+              <span className="text-charcoal/60 text-xs">({product.reviews})</span>
             </div>
           )}
         </CardBody>
