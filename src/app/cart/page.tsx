@@ -5,11 +5,11 @@ import { Button } from '@/components/ui';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/hooks/useCart';
-import { getProduct } from '@/lib/products';
+import { MOCK_PRODUCTS } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const { cart, removeItem, updateQuantity, clearCart, isLoading } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, isLoading, total } = useCart();
   const router = useRouter();
 
   if (isLoading) {
@@ -24,11 +24,11 @@ export default function CartPage() {
     );
   }
 
-  const isEmpty = cart.items.length === 0;
-  const subtotal = cart.total;
+  const isEmpty = items.length === 0;
+  const subtotal = total;
   const shipping = subtotal > 0 ? 9.99 : 0;
   const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const totalPrice = subtotal + shipping + tax;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -77,13 +77,13 @@ export default function CartPage() {
                 <div className="bg-white rounded-lg overflow-hidden">
                   <div className="border-b border-gray-200 p-4 md:p-6">
                     <h2 className="font-semibold text-charcoal">
-                      {cart.items.length} {cart.items.length === 1 ? 'Item' : 'Items'}
+                      {items.length} {items.length === 1 ? 'Item' : 'Items'}
                     </h2>
                   </div>
 
                   <div className="divide-y divide-gray-200">
-                    {cart.items.map((item) => {
-                      const product = getProduct(item.productId);
+                    {items.map((item) => {
+                      const product = MOCK_PRODUCTS.find((p) => p.id === item.productId);
                       if (!product) return null;
 
                       return (
@@ -197,8 +197,8 @@ export default function CartPage() {
                   <div className="border-t border-gray-200 pt-4 mb-6">
                     <div className="flex justify-between">
                       <span className="font-bold text-charcoal">Total</span>
-                      <span className="text-2xl font-bold text-clay-dark">
-                        ${total.toFixed(2)}
+                      <span className="text-2xl font-bold text-terracotta">
+                        ${totalPrice.toFixed(2)}
                       </span>
                     </div>
                   </div>

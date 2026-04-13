@@ -24,7 +24,7 @@ interface FormData {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, clearCart, isLoading } = useCart();
+  const { items, total, clearCart, isLoading } = useCart();
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirm'>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -43,10 +43,10 @@ export default function CheckoutPage() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
-  const subtotal = cart.total;
-  const shipping = 9.99;
+  const subtotal = total;
+  const shipping = subtotal > 0 ? 9.99 : 0;
   const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const totalPrice = subtotal + shipping + tax;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
     }, 1500);
   };
 
-  if (isLoading || cart.items.length === 0) {
+  if (isLoading || items.length === 0) {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
@@ -382,14 +382,17 @@ export default function CheckoutPage() {
                     <div className="border-t border-gray-200 pt-6">
                       <h3 className="font-semibold text-charcoal mb-4">Order Items</h3>
                       <div className="space-y-3">
-                        {cart.items.map((item) => (
-                          <div key={item.productId} className="flex justify-between text-sm">
-                            <span className="text-gray-700">
-                              Product x{item.quantity}
-                            </span>
-                            <span className="font-medium">${((item.quantity * 59.99)).toFixed(2)}</span>
-                          </div>
-                        ))}
+                        {items.map((item) => {
+                          const product = require('@/lib/api').MOCK_PRODUCTS.find((p: any) => p.id === item.productId);
+                          return (
+                            <div key={item.productId} className="flex justify-between text-sm">
+                              <span className="text-gray-700">
+                                {product?.name} x{item.quantity}
+                              </span>
+                              <span className="font-medium">${((item.quantity * (product?.price || 0))).toFixed(2)}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -436,8 +439,8 @@ export default function CheckoutPage() {
                 <div className="border-t border-gray-300 pt-4">
                   <div className="flex justify-between">
                     <span className="font-bold text-charcoal">Total</span>
-                    <span className="text-2xl font-bold text-clay-dark">
-                      ${total.toFixed(2)}
+                    <span className="text-2xl font-bold text-terracotta">
+                      ${totalPrice.toFixed(2)}
                     </span>
                   </div>
                 </div>

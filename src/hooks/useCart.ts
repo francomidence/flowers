@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { CartItem, Cart } from '@/lib/types';
-import { getProduct } from '@/lib/products';
+import { MOCK_PRODUCTS } from '@/lib/api';
+
+export interface CartItemData {
+  productId: string;
+  quantity: number;
+  addedAt: string;
+}
 
 const STORAGE_KEY = 'loverflowers-cart';
 
 export function useCart() {
-  const [cart, setCart] = useState<Cart>({ items: [], total: 0 });
+  const [items, setItems] = useState<CartItemData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load cart from localStorage on mount
@@ -15,10 +20,10 @@ export function useCart() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setCart(JSON.parse(saved));
+        setItems(JSON.parse(saved));
       }
     } catch (error) {
-      console.error('Failed to load cart', error);
+      console.warn('Failed to load cart from localStorage');
     } finally {
       setIsLoading(false);
     }
@@ -27,81 +32,61 @@ export function useCart() {
   // Save cart to localStorage when it changes
   useEffect(() => {
     if (!isLoading) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     }
-  }, [cart, isLoading]);
+  }, [items, isLoading]);
 
-  const calculateTotal = useCallback((items: CartItem[]) => {
-    return items.reduce((total, item) => {
-      const product = getProduct(item.productId);
+  const calculateTotal = useCallback((cartItems: CartItemData[]): number => {
+    return cartItems.reduce((total, item) => {
+      const product = MOCK_PRODUCTS.find((p) => p.id === item.productId);
       return total + (product?.price || 0) * item.quantity;
     }, 0);
   }, []);
 
-  const addItem = useCallback(
-    (productId: string, quantity: number = 1) => {
-      setCart((prev) => {
-        const existingItem = prev.items.find((i) => i.productId === productId);
-        let newItems;
+  const addItem = useCallback((productId: string, quantity: number = 1) => {
+    setItems((prev) => {
+      const existingItem = prev.find((i) => i.productId === productId);
 
-        if (existingItem) {
-          newItems = prev.items.map((i) =>
-            i.productId === productId
-              ? { ...i, quantity: i.quantity + quantity }
-              : i
-          );
-        } else {
-          newItems = [...prev.items, { productId, quantity, addedAt: new Date() }];
-        }
-
-        return {
-          items: newItems,
-          total: calculateTotal(newItems),
-        };
-      });
-    },
-    [calculateTotal]
-  );
-
-  const removeItem = useCallback((productId: string) => {
-    setCart((prev) => {
-      const newItems = prev.items.filter((i) => i.productId !== productId);
-      return {
-        items: newItems,
-        total: calculateTotal(newItems),
-      };
-    });
-  }, [calculateTotal]);
-
-  const updateQuantity = useCallback(
-    (productId: string, quantity: number) => {
-      if (quantity <= 0) {
-        removeItem(productId);
-        return;
+      if (existingItem) {
+        return prev.map((i) =>
+          i.productId === productId
+            ? { ...i, quantity: i.quantity + quantity }
+            : i
+        );
       }
 
-      setCart((prev) => {
-        const newItems = prev.items.map((i) =>
-          i.productId === productId ? { ...i, quantity } : i
-        );
-        return {
-          items: newItems,
-          total: calculateTotal(newItems),
-        };
-      });
-    },
-    [calculateTotal, removeItem]
-  );
-
-  const clearCart = useCallback(() => {
-    setCart({ items: [], total: 0 });
+      return [...prev, { productId, quantity, addedAt: new Date().toISOString() }];
+    });
   }, []);
 
-  const itemCount = cart.items.reduce((count, item) => count + item.quantity, 0);
+  const removeItem = useCallback((productId: string) => {
+    setItems((prev) => prev.filter((i) => i.productId !== productId));
+  }, []);
+
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeItem(productId);
+      return;
+    }
+
+    setItems((prev) =>
+      prev.map((i) =>
+        i.productId === productId ? { ...i, quantity } : i
+      )
+    );
+  }, [removeItem]);
+
+  const clearCart = useCallback(() => {
+    setItems([]);
+  }, []);
+
+  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
+  const total = calculateTotal(items);
 
   return {
-    cart,
+    items,
     itemCount,
+    total,
     isLoading,
     addItem,
     removeItem,

@@ -1,46 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@700&display=swap');
+/* Earthbound Editorial Design System */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:wght@400;700&family=Manrope:wght@400;500;600;700&display=swap');
 
-@import "tailwindcss";
-
-:root {
-  --font-merriweather: 'Merriweather', serif;
-  --font-inter: 'Inter', sans-serif;
-
-  /* Clay Palette */
-  --color-clay-dark: #8B6F47;
-  --color-clay-light: #D4A574;
-  --color-sage: #9FAD8A;
-  --color-cream: #F5F1E8;
-  --color-charcoal: #2B2520;
-
-  /* Semantic */
-  --bg-surface: #F5F1E8;
-  --text-primary: #2B2520;
-  --text-secondary: #5a5450;
-  --cta-primary: #D4A574;
-  --cta-hover: #8B6F47;
-  --accent: #9FAD8A;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-surface: #1a1815;
-    --text-primary: #ede8e0;
-    --text-secondary: #a89c92;
-    --cta-primary: #d4a574;
-    --cta-hover: #b8956a;
-  }
-}
+@import '../styles/tokens.css';
+@import 'tailwindcss';
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
-  font-family: var(--font-inter);
+  background-color: var(--color-clay);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography adjustments */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  color: var(--color-charcoal);
+  font-weight: 700;
+}
+
+/* Link styling */
+a {
+  color: var(--color-primary);
+  transition: color var(--duration-normal) var(--ease-ease);
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Focus visible for better accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection color aligned with brand */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 @media (prefers-reduced-motion: reduce) {

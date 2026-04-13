@@ -15,8 +15,8 @@ export function useWishlist() {
       if (saved) {
         setWishlist(JSON.parse(saved));
       }
-    } catch (error) {
-      console.error('Failed to load wishlist', error);
+    } catch {
+      console.warn('Failed to load wishlist from localStorage');
     } finally {
       setIsLoading(false);
     }
